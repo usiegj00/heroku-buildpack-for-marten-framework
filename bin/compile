@@ -40,8 +40,9 @@ function json_value() {
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
-LUCKY_ENV=production
-SKIP_LUCKY_TASK_PRECOMPILATION=1
+
+export LUCKY_ENV=production
+export SKIP_LUCKY_TASK_PRECOMPILATION=1
 
 if [ -f $BUILD_DIR/.crystal-version ]; then
     CRYSTAL_VERSION=`cat $BUILD_DIR/.crystal-version | tr -d '\012'`
