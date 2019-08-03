@@ -16,11 +16,11 @@ CURL="curl -s -L --retry 15 --retry-delay 2" # retry for up to 30 seconds
 
 # YAML parser from https://gist.github.com/pkuczynski/8665367
 parse_yaml() {
-   local prefix=$2
-   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
-   sed -ne "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
-        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
-   awk -F$fs '{
+    local prefix=$2
+    local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+    sed -ne "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
+    -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+    awk -F$fs '{
       indent = length($1)/2;
       vname[indent] = $2;
       for (i in vname) {if (i > indent) {delete vname[i]}}
@@ -28,25 +28,27 @@ parse_yaml() {
          vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
          printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
       }
-   }'
+    }'
 }
 
 function json_value() {
-  KEY=$1
-  num=$2
-  awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/\042'$KEY'\042/){print $(i+1)}}}' | tr -d ' "' | sed -n ${num}p
+    KEY=$1
+    num=$2
+    awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/\042'$KEY'\042/){print $(i+1)}}}' | tr -d ' "' | sed -n ${num}p
 }
 
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
+LUCKY_ENV=production
+SKIP_LUCKY_TASK_PRECOMPILATION=1
 
 if [ -f $BUILD_DIR/.crystal-version ]; then
-  CRYSTAL_VERSION=`cat $BUILD_DIR/.crystal-version | tr -d '\012'`
-  CRYSTAL_VERSION_REASON='due to .crystal-version file'
+    CRYSTAL_VERSION=`cat $BUILD_DIR/.crystal-version | tr -d '\012'`
+    CRYSTAL_VERSION_REASON='due to .crystal-version file'
 else
-  CRYSTAL_VERSION=`${CURL} https://api.github.com/repos/crystal-lang/crystal/releases/latest | json_value tag_name 1 | tr -d '\012'`
-  CRYSTAL_VERSION_REASON='due to latest release at https://github.com/crystal-lang/crystal'
+    CRYSTAL_VERSION=`${CURL} https://api.github.com/repos/crystal-lang/crystal/releases/latest | json_value tag_name 1 | tr -d '\012'`
+    CRYSTAL_VERSION_REASON='due to latest release at https://github.com/crystal-lang/crystal'
 fi
 
 TAG_NAME=`${CURL} https://api.github.com/repos/crystal-lang/crystal/releases | json_value tag_name | grep ${CRYSTAL_VERSION}`
@@ -62,7 +64,7 @@ mkdir -p $BUILD_DIR/.profile.d
 mkdir -p $BUILD_DIR/.heroku/crystal
 mkdir -p $BUILD_DIR/.heroku/lucky
 start "Installing Crystal ($CRYSTAL_VERSION $CRYSTAL_VERSION_REASON) from $CRYSTAL_URL to $CRYSTAL_DIR"
-  ${CURL} $CRYSTAL_URL | tar xz -C $CRYSTAL_DIR --strip-component=1
+${CURL} $CRYSTAL_URL | tar xz -C $CRYSTAL_DIR --strip-component=1
 finished
 PATH="${PATH}:${CRYSTAL_DIR}/bin"
 echo "export PATH=\$HOME/.heroku/crystal/bin:\$PATH" >> "$BUILD_DIR/.profile.d/crystal_environment.sh"
@@ -71,20 +73,20 @@ echo "export PATH=\$HOME/.heroku/crystal/bin:\$PATH" >> "$BUILD_DIR/.profile.d/c
 cd $BUILD_DIR
 
 start "Installing Dependencies"
-  shards install --production
+shards install --production
 finished
 
 NO_DEBUG_IF_AVAILABLE=`crystal build --help | grep -q -- --no-debug && echo -n --no-debug`
 
 if [ -f app.cr ]; then
-  start "Compiling app.cr (using old behaviour, app.cr exists - ignoring shard.yml)"
+    start "Compiling app.cr (using old behaviour, app.cr exists - ignoring shard.yml)"
     crystal build app.cr --release $NO_DEBUG_IF_AVAILABLE
-  finished
+    finished
 else
-  eval $(parse_yaml shard.yml "shard_")
-  start "Compiling src/${shard_name}.cr (auto-detected from shard.yml)"
+    eval $(parse_yaml shard.yml "shard_")
+    start "Compiling src/${shard_name}.cr (auto-detected from shard.yml)"
     crystal build src/${shard_name}.cr --release $NO_DEBUG_IF_AVAILABLE -o app
-  finished
+    finished
 fi
 
 start "Setting up Lucky tasks"
