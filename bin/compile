@@ -5,11 +5,8 @@ set -e
 steptxt="----->"
 
 start() {
+    echo
     echo "$steptxt $@..."
-}
-
-finished() {
-    echo "done"
 }
 
 CURL="curl -s -L --retry 15 --retry-delay 2" # retry for up to 30 seconds
@@ -66,7 +63,7 @@ mkdir -p $BUILD_DIR/.heroku/crystal
 mkdir -p $BUILD_DIR/.heroku/lucky
 start "Installing Crystal ($CRYSTAL_VERSION $CRYSTAL_VERSION_REASON) from $CRYSTAL_URL to $CRYSTAL_DIR"
 ${CURL} $CRYSTAL_URL | tar xz -C $CRYSTAL_DIR --strip-component=1
-finished
+
 PATH="${PATH}:${CRYSTAL_DIR}/bin:${CRYSTAL_DIR}/embedded/bin/"
 echo "export PATH=\$HOME/.heroku/crystal/bin:\$PATH" >> "$BUILD_DIR/.profile.d/crystal_environment.sh"
 
@@ -75,17 +72,14 @@ cd $BUILD_DIR
 
 start "Installing Dependencies"
 shards install --production
-finished
 
 if [ -f app.cr ]; then
     start "Compiling app.cr (using old behaviour, app.cr exists - ignoring shard.yml)"
     crystal build app.cr --release $NO_DEBUG_IF_AVAILABLE
-    finished
 else
     eval $(parse_yaml shard.yml "shard_")
     start "Compiling src/${shard_name}.cr (auto-detected from shard.yml)"
     crystal build src/${shard_name}.cr --release -o app
-    finished
 fi
 
 start "Setting up Lucky tasks"
@@ -93,5 +87,3 @@ start "Setting up Lucky tasks"
 crystal build tasks.cr -o $BUILD_DIR/.heroku/lucky/lucky
 
 echo "export PATH=\$PATH:\$HOME/.heroku/lucky" >> "$BUILD_DIR/.profile.d/lucky_environment.sh"
-
-finished
