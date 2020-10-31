@@ -54,13 +54,22 @@ unset GIT_DIR
 
 # Install Crystal
 mkdir -p "$ENV_DIR"
-mkdir -p "$CACHE_DIR"
-mkdir -p "$CRYSTAL_DIR"
+mkdir -p "$CACHE_DIR/crystal"
 mkdir -p "$BUILD_DIR/.profile.d"
 mkdir -p "$BUILD_DIR/.heroku/crystal"
 mkdir -p "$BUILD_DIR/.heroku/lucky"
-start "Installing Crystal ($CRYSTAL_VERSION $CRYSTAL_VERSION_REASON) from $CRYSTAL_URL to $CRYSTAL_DIR"
-${CURL} "$CRYSTAL_URL" | tar xz -C "$CRYSTAL_DIR" --strip-component=1
+
+if [ -f "$CACHE_DIR/crystal/$CRYSTAL_VERSION/.cache-complete" ]; then
+  start "Using cached Crysal (version $CRYSTAL_VERSION $CRYSTAL_VERSION_REASON)"
+  cp -r "$CACHE_DIR/crystal/$CRYSTAL_VERSION" "$CRYSTAL_DIR"
+else
+  start "Installing Crystal ($CRYSTAL_VERSION $CRYSTAL_VERSION_REASON) from $CRYSTAL_URL to $CRYSTAL_DIR"
+  mkdir -p "$CRYSTAL_DIR"
+  ${CURL} "$CRYSTAL_URL" | tar xz -C "$CRYSTAL_DIR" --strip-component=1
+  rm -rf "$CACHE_DIR/crystal/$CRYSTAL_VERSION"
+  cp -r "$CRYSTAL_DIR" "$CACHE_DIR/crystal/$CRYSTAL_VERSION"
+  touch "$CACHE_DIR/crystal/$CRYSTAL_VERSION/.cache-complete"
+fi
 
 PATH="${PATH}:${CRYSTAL_DIR}/bin:${CRYSTAL_DIR}/embedded/bin/"
 echo "export PATH=\$HOME/.heroku/crystal/bin:\$PATH" >> "$BUILD_DIR/.profile.d/crystal_environment.sh"
