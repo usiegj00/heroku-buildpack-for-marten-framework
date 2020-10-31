@@ -86,7 +86,6 @@ fi
 SHARDS_CHECKSUMS=$(md5sum shard.yml shard.lock)
 if [[ "$(cat "$CACHE_DIR/shards/checksums" 2>/dev/null || :)" == "$SHARDS_CHECKSUMS" ]]; then
   start "Skipping shards install (due to shard.yml and shard.lock matching the latest cache)"
-  cp -r "$CACHE_DIR/crystal/$CRYSTAL_VERSION" "$CRYSTAL_DIR"
 else
   start "Installing shards"
   shards install --production
