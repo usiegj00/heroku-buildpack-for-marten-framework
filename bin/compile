@@ -5,7 +5,7 @@ set -e
 steptxt="----->"
 
 start() {
-    echo -n "$steptxt $@... "
+    echo "$steptxt $@..."
 }
 
 finished() {
