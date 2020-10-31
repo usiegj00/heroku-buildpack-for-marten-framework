@@ -112,12 +112,12 @@ if [ -f app.cr ]; then
 else
   eval "$(parse_yaml shard.yml "shard_")"
   start "Compiling src/${shard_name}.cr (auto-detected from shard.yml)"
-  crystal build src/${shard_name}.cr --release -o app --stats
+  time crystal build src/${shard_name}.cr --release -o app --stats
 fi
 
 start "Setting up Lucky tasks"
 
-crystal build tasks.cr -o .heroku/lucky/lucky
+time crystal build tasks.cr -o .heroku/lucky/lucky --stats
 
 echo "export PATH=\$PATH:\$HOME/.heroku/lucky" >> .profile.d/lucky_environment.sh
 
