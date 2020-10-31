@@ -6,8 +6,10 @@ Forked from the [Lucky Framework Buildpack](https://github.com/luckyframework/he
 
 This fork **dramatically increases deployment speed** due to the following enhancements:
 
-- The Crystal installation is cached
-- Shards are cached, and `shards install` is only run when `shard.yml` or `shard.lock` have changed
+- Crystal build cache is retained (normally at `~/.cache/crystal`)
+- Shards are cached (`lib`)
+- `shards install` is only run when `shard.yml` or `shard.lock` have changed
+- Crystal version installation is cached
 - Logging is improved to actually show what's happening in the slow process of installing shards and compiling the app
 
 ## Usage
