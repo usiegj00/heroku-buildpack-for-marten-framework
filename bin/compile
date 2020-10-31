@@ -76,7 +76,18 @@ PATH="${PATH}:${CRYSTAL_DIR}/bin:${CRYSTAL_DIR}/embedded/bin/"
 echo "export PATH=\$HOME/.heroku/crystal/bin:\$PATH" >> "$BUILD_DIR/.profile.d/crystal_environment.sh"
 
 # Build the project
-cd "$BUILD_DIR"
+
+# Move to a constant build directory rather than the auto-generated one in order for crystal build's path-based cache to be reusable
+# The conditional checks if running on Heroku so as not to mess with your project directory when test-running locally
+if [[ "$BUILD_DIR" == /tmp/* ]]; then
+  cd /tmp
+  rm -rf /tmp/crystal-app-build
+  mv "$BUILD_DIR" /tmp/crystal-app-build
+  cd /tmp/crystal-app-build
+  PATH=$(echo "$PATH" | sed "s|$BUILD_DIR|/tmp/crystal-app-build|g")
+else
+  cd "$BUILD_DIR"
+fi
 
 if [[ -f "$CACHE_DIR/shards/checksums" ]]; then
   start "Copying cached shards"
@@ -106,6 +117,12 @@ fi
 
 start "Setting up Lucky tasks"
 
-crystal build tasks.cr -o "$BUILD_DIR/.heroku/lucky/lucky"
+crystal build tasks.cr -o .heroku/lucky/lucky
 
-echo "export PATH=\$PATH:\$HOME/.heroku/lucky" >> "$BUILD_DIR/.profile.d/lucky_environment.sh"
+echo "export PATH=\$PATH:\$HOME/.heroku/lucky" >> .profile.d/lucky_environment.sh
+
+if [[ "$BUILD_DIR" == /tmp/* ]]; then
+  cd /tmp
+  mv /tmp/crystal-app-build "$BUILD_DIR"
+  cd "$BUILD_DIR"
+fi

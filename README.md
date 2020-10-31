@@ -36,5 +36,6 @@ $ (cd ~/Projects/my-lucky-app && yarn && yarn prod) && ./bin/compile ~/Projects/
 
 ## Todo
 
+- [x] Test deploying my app to Heroku using this
 - [ ] Split this buildpack in two - the vast majority of the code is for Crystal and not specific to Lucky
 - [ ] Figure out what to do about the unit tests (`tests/run`), which were already failing when I forked
