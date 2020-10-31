@@ -78,8 +78,23 @@ echo "export PATH=\$HOME/.heroku/crystal/bin:\$PATH" >> "$BUILD_DIR/.profile.d/c
 # Build the project
 cd "$BUILD_DIR"
 
-start "Installing Dependencies"
-shards install --production
+if [[ -f "$CACHE_DIR/shards/checksums" ]]; then
+  start "Copying cached shards"
+  cp -r "$CACHE_DIR/shards/lib" lib
+fi
+
+SHARDS_CHECKSUMS=$(md5sum shard.yml shard.lock)
+if [[ "$(cat "$CACHE_DIR/shards/checksums" 2>/dev/null || :)" == "$SHARDS_CHECKSUMS" ]]; then
+  start "Skipping shards install (due to shard.yml and shard.lock matching the latest cache)"
+  cp -r "$CACHE_DIR/crystal/$CRYSTAL_VERSION" "$CRYSTAL_DIR"
+else
+  start "Installing shards"
+  shards install --production
+  rm -rf "$CACHE_DIR/shards"
+  mkdir "$CACHE_DIR/shards"
+  cp -r lib "$CACHE_DIR/shards/lib"
+  echo "$SHARDS_CHECKSUMS" > "$CACHE_DIR/shards/checksums"
+fi
 
 if [ -f app.cr ]; then
   start "Compiling app.cr (using old behaviour, app.cr exists - ignoring shard.yml)"
