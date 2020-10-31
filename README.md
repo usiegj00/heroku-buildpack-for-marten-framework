@@ -21,7 +21,7 @@ $ heroku buildpacks:add https://github.com/luckyframework/heroku-buildpack-cryst
 run:
 
 ```bash
-$ heroku buildpacks:add https://github.com/ZimbiX/heroku-buildpack-crystal
+$ heroku buildpacks:add https://github.com/ZimbiX/heroku-buildpack-for-lucky-framework-with-caching
 ```
 
 Note that this Buildpack is unofficial. If you're concerned about security (which you should be), you can fork this repo, read [the code](bin), and use your fork's URL instead of mine - to prevent any unwanted changes being automatically applied to your next deployment.
