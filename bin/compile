@@ -2,11 +2,9 @@
 
 set -e
 
-steptxt="----->"
-
 start() {
   echo
-  echo "$steptxt $@..."
+  echo "-----> $1..."
 }
 
 CURL="curl -s -L --retry 15 --retry-delay 2" # retry for up to 30 seconds
@@ -28,7 +26,7 @@ parse_yaml() {
   }'
 }
 
-function json_value() {
+json_value() {
   KEY=$1
   num=$2
   awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/\042'$KEY'\042/){print $(i+1)}}}' | tr -d ' "' | sed -n ${num}p
