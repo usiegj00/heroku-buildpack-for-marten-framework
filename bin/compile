@@ -62,7 +62,7 @@ mkdir -p "$BUILD_DIR/.heroku/lucky"
 
 if [ -f "$CACHE_DIR/crystal/$CRYSTAL_VERSION/.cache-complete" ]; then
   start "Using cached Crysal (version $CRYSTAL_VERSION $CRYSTAL_VERSION_REASON)"
-  cp -r "$CACHE_DIR/crystal/$CRYSTAL_VERSION" "$CRYSTAL_DIR"
+  cp -r "$CACHE_DIR/crystal/$CRYSTAL_VERSION/." "$CRYSTAL_DIR"
 else
   start "Installing Crystal ($CRYSTAL_VERSION $CRYSTAL_VERSION_REASON) from $CRYSTAL_URL to $CRYSTAL_DIR"
   mkdir -p "$CRYSTAL_DIR"
