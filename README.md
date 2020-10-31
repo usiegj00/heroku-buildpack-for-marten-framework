@@ -1,37 +1,40 @@
-# Crystal Heroku Buildpack
+# Heroku Buildpack for Crystal + Lucky Framework, with caching
 
-You can create an app in Heroku with Crystal's buildpack by running the
-following command:
+This is a buildpack allowing easy and fast deployment of a [Lucky Framework](https://luckyframework.org) app to [Heroku](https://www.heroku.com/).
+
+Forked from the [Lucky Framework Buildpack](https://github.com/luckyframework/heroku-buildpack-crystal) (which is itself a fork of the [Crystal Buildpack](https://github.com/crystal-lang/heroku-buildpack-crystal)).
+
+This fork **dramatically increases deployment speed** due to the following enhancements:
+
+- The Crystal installation is cached
+- Shards are cached, and `shards install` is only run when `shard.yml`/`shard.lock` change
+- Logging is improved to actually show what's happening in the slow process of installing shards and compiling the app
+
+## Usage
+
+Follow the [Lucky Framework Heroku deployment guide](https://luckyframework.org/guides/deploying/heroku), but instead of:
 
 ```bash
-$ heroku create myapp --buildpack https://github.com/crystal-lang/heroku-buildpack-crystal.git
+$ heroku buildpacks:add https://github.com/luckyframework/heroku-buildpack-crystal
 ```
 
-The default behaviour is to use the [latest crystal release](https://github.com/crystal-lang/crystal/releases/latest).
-If you need to use a specific version create a `.crystal-version` file in your
-application root directory with the version that should be used (e.g. `0.17.1`).
+run:
 
-## Requirements
+```bash
+$ heroku buildpacks:add https://github.com/ZimbiX/heroku-buildpack-crystal
+```
 
-In order for the buildpack to work properly you should have a `shard.yml` file,
-as it is how it will detect that your app is a Crystal app.
+Note that this Buildpack is unofficial. If you're concerned about security (which you should be), you can fork this repo, read [the code](bin), and use your fork's URL instead of mine - to prevent any unwanted changes being automatically applied to your next deployment.
 
-Your application has to listen on a port defined by Heroku. It is given to you
-through the command line option `--port` and the environment variable `PORT`
-(accessible through `ENV["PORT"]` in Crystal). However, most web frameworks
-should handle this for you.
+## Buildpack development
 
-## Testing
+I haven't looked at the existing test suite enough, so I've been testing this using:
 
-To test a change to this buildpack, write a unit test in `tests/run` that asserts your change and
-run `make test` to ensure the change works as intended and does not break backwards compatibility.
+```bash
+$ (cd ~/Projects/my-lucky-app && yarn && yarn prod) && ./bin/compile ~/Projects/my-lucky-app $PWD/test-cache $PWD/test-env
+```
 
-## More info
+## Todo
 
-To learn more about how to deploy a Crystal application to Heroku, read
-[our blog post](http://crystal-lang.org/2016/05/26/heroku-buildpack.html).
-
-## Older versions of Crystal
-
-If you have and older version of Crystal (`<= 0.9`), that uses the old
-`Projectfile` way of handling dependencies, please upgrade :-).
+- [ ] Split this buildpack in two - the vast majority of the code is for Crystal and not specific to Lucky
+- [ ] Figure out what to do about the unit tests (`tests/run`), which were already failing when I forked
