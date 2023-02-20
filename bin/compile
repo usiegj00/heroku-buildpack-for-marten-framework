@@ -104,10 +104,10 @@ else
 fi
 
 start "Compiling manage"
-time crystal build manage.cr     -o bin/manage --release $NO_DEBUG_IF_AVAILABLE --stats
+time crystal build manage.cr     -o bin/manage --release --stats
 
 start "Compiling server"
-time crystal build src/server.cr -o bin/server --release $NO_DEBUG_IF_AVAILABLE --stats
+time crystal build src/server.cr -o bin/server --release --stats
 
 if [[ "$BUILD_DIR" == /tmp/* ]]; then
   cd /tmp
