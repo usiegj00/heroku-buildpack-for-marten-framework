@@ -105,8 +105,11 @@ else
   echo "$SHARDS_CHECKSUMS" > "$CACHE_DIR/shards/checksums"
 fi
 
-start "Compiling manage"
+start "Ensuring build dir $BUILD_DIR/bin"
 mkdir -p "$BUILD_DIR/bin"
+start "Compiling $BUILD_DIR/bin/manage"
+time crystal build manage.cr     -o "$BUILD_DIR/bin/manage" --release --stats
+start "Compiling bin/manage"
 time crystal build manage.cr     -o bin/manage --release --stats
 
 start "Compiling server"
