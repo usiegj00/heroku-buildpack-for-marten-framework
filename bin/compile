@@ -37,8 +37,6 @@ CACHE_DIR=$2
 ENV_DIR=$3
 
 export CRYSTAL_CACHE_DIR=$CACHE_DIR/crystal-cache
-export LUCKY_ENV=production
-export SKIP_LUCKY_TASK_PRECOMPILATION=1
 
 if [ -f "$BUILD_DIR/.crystal-version" ]; then
   CRYSTAL_VERSION=$(cat "$BUILD_DIR/.crystal-version" | tr -d '\012')
@@ -58,7 +56,6 @@ mkdir -p "$ENV_DIR"
 mkdir -p "$CACHE_DIR/crystal"
 mkdir -p "$BUILD_DIR/.profile.d"
 mkdir -p "$BUILD_DIR/.heroku/crystal"
-mkdir -p "$BUILD_DIR/.heroku/lucky"
 
 if [ -f "$CACHE_DIR/crystal/$CRYSTAL_VERSION/.cache-complete" ]; then
   start "Using cached Crysal (version $CRYSTAL_VERSION $CRYSTAL_VERSION_REASON)"
@@ -106,20 +103,11 @@ else
   echo "$SHARDS_CHECKSUMS" > "$CACHE_DIR/shards/checksums"
 fi
 
-if [ -f app.cr ]; then
-  start "Compiling app.cr (using old behaviour, app.cr exists - ignoring shard.yml)"
-  crystal build app.cr --release $NO_DEBUG_IF_AVAILABLE --stats
-else
-  eval "$(parse_yaml shard.yml "shard_")"
-  start "Compiling src/${shard_name}.cr (auto-detected from shard.yml)"
-  time crystal build src/${shard_name}.cr --release -o app --stats
-fi
+start "Compiling manage"
+time crystal build manage.cr     -o bin/manage --release $NO_DEBUG_IF_AVAILABLE --stats
 
-start "Setting up Lucky tasks"
-
-time crystal build tasks.cr -o .heroku/lucky/lucky --stats
-
-echo "export PATH=\$PATH:\$HOME/.heroku/lucky" >> .profile.d/lucky_environment.sh
+start "Compiling server"
+time crystal build src/server.cr -o bin/server --release $NO_DEBUG_IF_AVAILABLE --stats
 
 if [[ "$BUILD_DIR" == /tmp/* ]]; then
   cd /tmp
