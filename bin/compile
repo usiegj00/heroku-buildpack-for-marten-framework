@@ -104,6 +104,7 @@ else
 fi
 
 start "Compiling manage"
+mkdir -p "$BUILD_DIR/bin"
 time crystal build manage.cr     -o bin/manage --release --stats
 
 start "Compiling server"
