@@ -32,7 +32,7 @@ json_value() {
   awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/\042'"$KEY"'\042/){print $(i+1)}}}' | tr -d ' "' | sed -n "${num}p"
 }
 
-start "Marten Framework Buildpack v0.10"
+start "Marten Framework Buildpack v0.11"
 
 BUILD_DIR=$1
 CACHE_DIR=$2
@@ -78,14 +78,17 @@ echo "export PATH=\$HOME/.heroku/crystal/bin:\$PATH" >> "$BUILD_DIR/.profile.d/c
 
 # Move to a constant build directory rather than the auto-generated one in order for crystal build's path-based cache to be reusable
 # The conditional checks if running on Heroku so as not to mess with your project directory when test-running locally
+
 if [[ "$BUILD_DIR" == /tmp/* ]]; then
   cd /tmp
   rm -rf /tmp/crystal-app-build
   mv "$BUILD_DIR" /tmp/crystal-app-build
   cd /tmp/crystal-app-build
   PATH=$(echo "$PATH" | sed "s|$BUILD_DIR|/tmp/crystal-app-build|g")
+  CRYSTAL_BUILD_DIR="/tmp/crystal-app-build"
 else
   cd "$BUILD_DIR"
+  CRYSTAL_BUILD_DIR="$BUILD_DIR"
 fi
 
 if [[ -f "$CACHE_DIR/shards/checksums" ]]; then
@@ -105,10 +108,10 @@ else
   echo "$SHARDS_CHECKSUMS" > "$CACHE_DIR/shards/checksums"
 fi
 
-start "Ensuring build dir $BUILD_DIR/bin"
-mkdir -p "$BUILD_DIR/bin"
-start "Compiling $BUILD_DIR/bin/manage"
-time crystal build manage.cr     -o "$BUILD_DIR/bin/manage" --release --stats
+start "Ensuring build dir $CRYSTAL_BUILD_DIR/bin"
+mkdir -p "$CRYSTAL_BUILD_DIR/bin"
+start "Compiling $CRYSTAL_BUILD_DIR/bin/manage"
+time crystal build manage.cr     -o "$CRYSTAL_BUILD_DIR/bin/manage" --release --stats
 start "Compiling bin/manage"
 time crystal build manage.cr     -o bin/manage --release --stats
 
