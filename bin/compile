@@ -32,6 +32,8 @@ json_value() {
   awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/\042'"$KEY"'\042/){print $(i+1)}}}' | tr -d ' "' | sed -n "${num}p"
 }
 
+start "Marten Framework Buildpack v0.10"
+
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
