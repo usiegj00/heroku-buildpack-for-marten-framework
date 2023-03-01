@@ -60,7 +60,7 @@ mkdir -p "$BUILD_DIR/.profile.d"
 mkdir -p "$BUILD_DIR/.heroku/crystal"
 
 if [ -f "$CACHE_DIR/crystal/$CRYSTAL_VERSION/.cache-complete" ]; then
-  start "Using cached Crysal (version $CRYSTAL_VERSION $CRYSTAL_VERSION_REASON)"
+  start "Using cached Crystal (version $CRYSTAL_VERSION $CRYSTAL_VERSION_REASON)"
   cp -r "$CACHE_DIR/crystal/$CRYSTAL_VERSION/." "$CRYSTAL_DIR"
 else
   start "Installing Crystal ($CRYSTAL_VERSION $CRYSTAL_VERSION_REASON) from $CRYSTAL_URL to $CRYSTAL_DIR"
@@ -111,12 +111,11 @@ fi
 start "Ensuring build dir $CRYSTAL_BUILD_DIR/bin"
 mkdir -p "$CRYSTAL_BUILD_DIR/bin"
 start "Compiling $CRYSTAL_BUILD_DIR/bin/manage"
-time crystal build manage.cr     -o "$CRYSTAL_BUILD_DIR/bin/manage" --release --stats
-start "Compiling bin/manage"
-time crystal build manage.cr     -o bin/manage --release --stats
+# TODO: Make release optional depending on ENV. It significantly increases build times. 
+time crystal build manage.cr     -o "$CRYSTAL_BUILD_DIR/bin/manage" --stats 2>&1 # --release
 
 start "Compiling server"
-time crystal build src/server.cr -o bin/server --release --stats
+time crystal build src/server.cr -o "$CRYSTAL_BUILD_DIR/bin/server" --stats 2>&1 # --release
 
 if [[ "$BUILD_DIR" == /tmp/* ]]; then
   cd /tmp

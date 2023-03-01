@@ -4,6 +4,6 @@ cat << EOF
 ---
 addons:
 default_process_types:
-  web:     bin/server --port \$PORT
+  web: bin/server --port \$PORT
   release: bin/manage migrate
 EOF
